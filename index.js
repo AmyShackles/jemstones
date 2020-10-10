@@ -1,16 +1,43 @@
 require("dotenv").config();
 const { App, ExpressReceiver, LogLevel } = require("@slack/bolt");
+const Transaction = require('./models/Transaction');
+const User = require('./models/User.js');
 const { createTransaction } = require('./routes/jemstonesRouter.js');
 const mongoose = require('mongoose');
 const db = require("./data/db.js");
 const mongoURI = process.env.MONGO_URI;
+mongoose.Promise = global.Promise;
+
 const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
-const server = receiver.app;
+const router = receiver.router;
 
-// server.use('/jemstones', jemstonesRouter);
-mongoose.Promise = global.Promise;
+
+const sendUserError = (status, message, res) => {
+    res.status(status).json({ error: message });
+    return;
+}
+
+router.get('/transactions', async (req, res) => {
+    Transaction.find()
+    .select('-__v -_id')
+    .populate('giver receiver')
+    .then(transactions => {
+        res.status(200).json({ transactions})
+    })
+    .catch(err => sendUserError(500, err.message, res))
+})
+
+router.get('/users', async (req, res) => {
+    User.find()
+    .select('-__v -_id')
+    .then(users => {
+        res.status(200).json({ users })
+    })
+    .catch(err => sendUserError(500, err.message, res))
+})
+
 
 
 db.connectTo(mongoURI)
@@ -46,5 +73,3 @@ slackApp.error(async (error) => {
   await slackApp.start(process.env.PORT || 8080);
   console.log("* Bolt app is running! (better go catch it, then)");
 })();
-
-module.exports = server;
