@@ -31,7 +31,7 @@ slackApp.message("jemstones", async ({ message, say }) => {
 });
 */
 
-slackApp.command("/jemstone", async ({ command, ack, respond }) => {
+slackApp.command("/jemstones", async ({ command, ack, respond }) => {
   await ack();
   const response = await createTransaction(command);
   await respond(response);
