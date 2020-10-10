@@ -21,7 +21,6 @@ async function createTransaction(command) {
     { user_name: receiver_username, $inc: { 'jemstones': amount }},
     { upsert: true, new: true }
   );
-  console.log({receiver, giver})
   if (!receiver && !amount) {
     return `You cannae gift jemstones without specifying a receiver and an amount`;
   } else if (!receiver) {
