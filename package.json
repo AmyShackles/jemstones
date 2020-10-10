@@ -1,0 +1,15 @@
+{
+  "name": "jemstones",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Amy Shackles <amyshackles@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/bolt": "^2.4.1",
+    "dotenv": "^8.2.0",
+    "mongoose": "^5.10.9"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
