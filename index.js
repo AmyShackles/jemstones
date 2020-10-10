@@ -57,13 +57,26 @@ slackApp.message("jemstones", async ({ message, say }) => {
   await say(`Did you mention jemstones, <@${message.user}>!?`);
 });
 */
-
+slackApp.command("/jamstones", async ({ command, ack, respond }) => {
+    await ack();
+    const response = await createTransaction(command, 'jamstones');
+    await respond(response);
+  });
 slackApp.command("/jemstones", async ({ command, ack, respond }) => {
   await ack();
-  const response = await createTransaction(command);
+  const response = await createTransaction(command, 'jemstones');
   await respond(response);
 });
-
+slackApp.command("/jomstones", async ({ command, ack, respond }) => {
+    await ack();
+    const response = await createTransaction(command, 'jomstones');
+    await respond(response);
+  });
+  slackApp.command("/jumstones", async ({ command, ack, respond }) => {
+    await ack();
+    const response = await createTransaction(command, 'jumstones');
+    await respond(response);
+  });
 slackApp.error(async (error) => {
   const message = `DOES NOT COMPUTE: ${error.toString()}`;
   console.error(message);
