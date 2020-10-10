@@ -34,7 +34,7 @@ async function createTransaction(command) {
           {$inc: { jemstones: amount }},
           {upsert: true, new: true}
       );
-      return `<@${giver_id}|${giver_username}> attempted to remove ${amount} jemstones from <@${receiver_id}|${receiver_username}> - their own jemstones are now down to ${karma.jemstones}`
+      return `<@${giver_id}|${giver_username}> attempted to remove ${Math.abs(amount)} jemstones from <@${receiver_id}|${receiver_username}> - their own jemstones are now down to ${karma.jemstones}`
   } else {
     let doc = await Transaction.create({channel_id, channel_name, giver, receiver, amount });
     return `<@${giver_id}|${giver_username}> gifted <@${receiver_id}|${receiver_username}> a whole ${doc.amount} jemstones!`;
