@@ -1,9 +1,9 @@
 require("dotenv").config();
 const { App, ExpressReceiver, LogLevel } = require("@slack/bolt");
-const Transaction = require('./models/Transaction');
-const User = require('./models/User.js');
-const { createTransaction } = require('./routes/jemstonesRouter.js');
-const mongoose = require('mongoose');
+const Transaction = require("./models/Transaction");
+const User = require("./models/User.js");
+const { createTransaction } = require("./routes/jemstonesRouter.js");
+const mongoose = require("mongoose");
 const db = require("./data/db.js");
 const mongoURI = process.env.MONGO_URI;
 mongoose.Promise = global.Promise;
@@ -13,32 +13,64 @@ const receiver = new ExpressReceiver({
 });
 const router = receiver.router;
 
-
 const sendUserError = (status, message, res) => {
-    res.status(status).json({ error: message });
-    return;
-}
+  res.status(status).json({ error: message });
+  return;
+};
 
-router.get('/transactions', async (req, res) => {
-    Transaction.find()
-    .select('-__v -_id')
-    .populate('giver receiver')
-    .then(transactions => {
-        res.status(200).json({ transactions})
+router.get("/transactions", async (req, res) => {
+  Transaction.find()
+    .select("-__v -_id -createdAt -updatedAt -channel_id")
+    .populate({path: 'giver', select: 'user_name user_id'})
+    .populate({path: 'receiver', select: 'user_name user_id'})
+    .then((transactions) => {
+      res.status(200).json({ transactions });
     })
-    .catch(err => sendUserError(500, err.message, res))
-})
+    .catch((err) => sendUserError(500, err.message, res));
+});
 
-router.get('/users', async (req, res) => {
-    User.find()
-    .select('-__v -_id')
-    .then(users => {
-        res.status(200).json({ users })
-    })
-    .catch(err => sendUserError(500, err.message, res))
-})
-
-
+router.get("/", async (req, res) => {
+  const { leaderboard } = req.query;
+  let sort;
+  if (leaderboard && /jam/.test(leaderboard)) {
+    sort = "-jamstones";
+  } else if (leaderboard && /jem/.test(leaderboard)) {
+    sort = "-jemstones";
+  } else if (leaderboard && /jom/.test(leaderboard)) {
+    sort = "-jomstones";
+  } else if (leaderboard && /jum/.test(leaderboard)) {
+    sort = "-jumstones";
+  } else {
+    sort = "-stones";
+  }
+  User.find()
+    .select("-__v -_id")
+    .sort(sort)
+    .then((leaders) => {
+      res.status(200).json({ leaders });
+    });
+});
+router.get("/:type", async (req, res) => {
+  const { type } = req.params;
+  let sort;
+  if (type && /jam/.test(type)) {
+    sort = "-jamstones";
+  } else if (type && /jem/.test(type)) {
+    sort = "-jemstones";
+  } else if (type && /jom/.test(type)) {
+    sort = "-jomstones";
+  } else if (type && /jum/.test(type)) {
+    sort = "-jumstones";
+  } else {
+    sort = "-stones";
+  }
+  User.find()
+    .select("-__v -_id -createdAt -updatedAt")
+    .sort(sort)
+    .then((leaders) => {
+      res.status(200).json({ leaders });
+    });
+});
 
 db.connectTo(mongoURI)
   .then(() => console.log("\n...API Connected to database ...\n"))
@@ -58,25 +90,25 @@ slackApp.message("jemstones", async ({ message, say }) => {
 });
 */
 slackApp.command("/jamstones", async ({ command, ack, respond }) => {
-    await ack();
-    const response = await createTransaction(command, 'jamstones');
-    await respond(response);
-  });
+  await ack();
+  const response = await createTransaction(command, "jamstones");
+  await respond(response);
+});
 slackApp.command("/jemstones", async ({ command, ack, respond }) => {
   await ack();
-  const response = await createTransaction(command, 'jemstones');
+  const response = await createTransaction(command, "jemstones");
   await respond(response);
 });
 slackApp.command("/jomstones", async ({ command, ack, respond }) => {
-    await ack();
-    const response = await createTransaction(command, 'jomstones');
-    await respond(response);
-  });
-  slackApp.command("/jumstones", async ({ command, ack, respond }) => {
-    await ack();
-    const response = await createTransaction(command, 'jumstones');
-    await respond(response);
-  });
+  await ack();
+  const response = await createTransaction(command, "jomstones");
+  await respond(response);
+});
+slackApp.command("/jumstones", async ({ command, ack, respond }) => {
+  await ack();
+  const response = await createTransaction(command, "jumstones");
+  await respond(response);
+});
 slackApp.error(async (error) => {
   const message = `DOES NOT COMPUTE: ${error.toString()}`;
   console.error(message);
