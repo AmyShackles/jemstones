@@ -7,6 +7,7 @@ const Transaction = mongoose.Schema({
     giver: { type: ObjectId, ref: 'User'},
     receiver: { type: ObjectId, ref: 'User'},
     amount: Number,
+    type: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Transaction', Transaction);
