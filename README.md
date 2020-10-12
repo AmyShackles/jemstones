@@ -15,6 +15,30 @@ GET https://jemstones.herokuapp.com/transactions
 GET https://jemstones.herokuapp.com/users
 - Displays a list of all users (includes those who give and receive jemstones)
 
+GET https://jemstones.herokuapp.com/?leaderboard=jam
+- Displays a list of users sorted from highest to lowest jamstones
+
+GET https://jemstones.herokuapp.com/?leaderboard=jem
+- Displays a list of users sorted from highest to lowest jemstones
+
+GET https://jemstones.herokuapp.com/?leaderboard=jom
+- Displays a list of users sorted from highest to lowest jomstones
+
+GET https://jemstones.herokuapp.com/?leaderboard=jum
+- Displays a list of users sorted from highest to lowest jumstones
+
+GET https://jemstones.herokuapp.com/jam
+- Displays a list of users sorted from highest to lowest jamstones
+
+GET https://jemstones.herokuapp.com/jem
+- Displays a list of users sorted from highest to lowest jemstones
+
+GET https://jemstones.herokuapp.com/jom
+- Displays a list of users sorted from highest to lowest jomstones
+
+GET https://jemstones.herokuapp.com/jum
+- Displays a list of users sorted from highest to lowest jumstones
+
 ### Slash command usage:
 ```
 /jamstones <username of person you want to gift> <amount you want to gift>
