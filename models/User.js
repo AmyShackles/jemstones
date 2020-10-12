@@ -7,7 +7,16 @@ const User = mongoose.Schema({
     jemstones: { type: Number, default: 0 },
     jomstones: { type: Number, default: 0 },
     jumstones: { type: Number, default: 0 },
+    stones: { type: Number, default: 0 }
 
-}, { timestamps: true });
+}, { timestamps: true});
 
+User.post('find', (docs) => {
+    docs.forEach(doc => {
+        if (doc.stones !== (doc.jamstones + doc.jemstones + doc.jomstones + doc.jumstones)) {
+            doc.stones = doc.jamstones + doc.jemstones + doc.jomstones + doc.jumstones;
+        }
+    })
+    return;
+})
 module.exports = mongoose.model('User', User);
