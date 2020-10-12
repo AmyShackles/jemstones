@@ -18,7 +18,7 @@ async function createTransaction(command, jType) {
   );
   const receiver = await User.findOneAndUpdate(
     { user_id: receiver_id },
-    { user_name: receiver_username, $inc: { [jType]: amount }},
+    { user_name: receiver_username, $inc: { [jType]: amount, stones: amount }},
     { upsert: true, new: true }
   );
   if (!receiver && !amount) {
@@ -30,12 +30,12 @@ async function createTransaction(command, jType) {
   } else if (amount < 0) {
       let karma = await User.findOneAndUpdate(
           {user_id: giver_id},
-          {$inc: { [jType]: amount }},
+          {$inc: { [jType]: amount, stones: amount }},
           {upsert: true, new: true}
       );
       return `<@${giver_id}|${giver_username}> attempted to remove ${Math.abs(amount)} ${jType} from <@${receiver_id}|${receiver_username}> - their own ${jType} are now down to ${karma[jType]}`
   } else {
-    let doc = await Transaction.create({channel_id, channel_name, giver, receiver, amount });
+    let doc = await Transaction.create({channel_id, channel_name, giver, receiver, amount, type: jType });
     return `<@${giver_id}|${giver_username}> gifted <@${receiver_id}|${receiver_username}> a whole ${doc.amount} ${jType}!`;
   }
 }
