@@ -15,9 +15,12 @@ const receiver = new ExpressReceiver({
 const router = receiver.router;
 router.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", `${process.env.REACT_APP}`);
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   next();
-})
+});
 const sendUserError = (status, message, res) => {
   res.status(status).json({ error: message });
   return;
@@ -26,8 +29,8 @@ const sendUserError = (status, message, res) => {
 router.get("/transactions", async (req, res) => {
   Transaction.find()
     .select("-__v -_id -createdAt -updatedAt -channel_id")
-    .populate({path: 'giver', select: 'user_name user_id'})
-    .populate({path: 'receiver', select: 'user_name user_id'})
+    .populate({ path: "giver", select: "user_name user_id" })
+    .populate({ path: "receiver", select: "user_name user_id" })
     .then((transactions) => {
       res.status(200).json({ transactions });
     })
@@ -97,37 +100,37 @@ slackApp.message("jemstones", async ({ message, say }) => {
 slackApp.command("/jamstones", async ({ command, ack, respond, logger }) => {
   try {
     await ack();
-  const response = await createTransaction(command, "jamstones");
-  await respond(response);
+    const response = await createTransaction(command, "jamstones");
+    await respond(response);
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
   }
 });
 slackApp.command("/jemstones", async ({ command, ack, respond, logger }) => {
   try {
-  await ack();
-  const response = await createTransaction(command, "jemstones");
-  await respond(response);
+    await ack();
+    const response = await createTransaction(command, "jemstones");
+    await respond(response);
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
   }
 });
 slackApp.command("/jomstones", async ({ command, ack, respond, logger }) => {
   try {
     await ack();
-  const response = await createTransaction(command, "jomstones");
-  await respond(response);
-  } catch(error) {
-    logger.error(error)
+    const response = await createTransaction(command, "jomstones");
+    await respond(response);
+  } catch (error) {
+    logger.error(error);
   }
 });
 slackApp.command("/jumstones", async ({ command, ack, respond, logger }) => {
   try {
     await ack();
-  const response = await createTransaction(command, "jumstones");
-  await respond(response);
+    const response = await createTransaction(command, "jumstones");
+    await respond(response);
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
   }
 });
 slackApp.error(async (error) => {
