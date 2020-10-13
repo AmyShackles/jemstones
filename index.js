@@ -11,8 +11,13 @@ mongoose.Promise = global.Promise;
 const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
-const router = receiver.router;
 
+const router = receiver.router;
+router.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", `${process.env.REACT_APP}`);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+})
 const sendUserError = (status, message, res) => {
   res.status(status).json({ error: message });
   return;
@@ -89,25 +94,41 @@ slackApp.message("jemstones", async ({ message, say }) => {
   await say(`Did you mention jemstones, <@${message.user}>!?`);
 });
 */
-slackApp.command("/jamstones", async ({ command, ack, respond }) => {
-  await ack();
+slackApp.command("/jamstones", async ({ command, ack, respond, logger }) => {
+  try {
+    await ack();
   const response = await createTransaction(command, "jamstones");
   await respond(response);
+  } catch (error) {
+    logger.error(error)
+  }
 });
-slackApp.command("/jemstones", async ({ command, ack, respond }) => {
+slackApp.command("/jemstones", async ({ command, ack, respond, logger }) => {
+  try {
   await ack();
   const response = await createTransaction(command, "jemstones");
   await respond(response);
+  } catch (error) {
+    logger.error(error)
+  }
 });
-slackApp.command("/jomstones", async ({ command, ack, respond }) => {
-  await ack();
+slackApp.command("/jomstones", async ({ command, ack, respond, logger }) => {
+  try {
+    await ack();
   const response = await createTransaction(command, "jomstones");
   await respond(response);
+  } catch(error) {
+    logger.error(error)
+  }
 });
-slackApp.command("/jumstones", async ({ command, ack, respond }) => {
-  await ack();
+slackApp.command("/jumstones", async ({ command, ack, respond, logger }) => {
+  try {
+    await ack();
   const response = await createTransaction(command, "jumstones");
   await respond(response);
+  } catch (error) {
+    logger.error(error)
+  }
 });
 slackApp.error(async (error) => {
   const message = `DOES NOT COMPUTE: ${error.toString()}`;
