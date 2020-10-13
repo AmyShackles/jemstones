@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const User = mongoose.Schema({
     user_id: String,
     user_name: String,
+    display_name: String,
+    image: String,
     jamstones: { type: Number, default: 0 },
     jemstones: { type: Number, default: 0 },
     jomstones: { type: Number, default: 0 },
