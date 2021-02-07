@@ -48,6 +48,8 @@ router.get("/", async (req, res) => {
     sort = "-jomstones";
   } else if (leaderboard && /jum/.test(leaderboard)) {
     sort = "-jumstones";
+  } else if (leaderboard && /jan/.test(leaderboard)) {
+    sort = "-janstones";
   } else {
     sort = "-stones";
   }
@@ -69,6 +71,8 @@ router.get("/:type", async (req, res) => {
     sort = "-jomstones";
   } else if (type && /jum/.test(type)) {
     sort = "-jumstones";
+  } else if (type && /jan/.test(type)) {
+    sort = "-janstones";
   } else {
     sort = "-stones";
   }
@@ -132,6 +136,15 @@ slackApp.command("/jumstones", async ({ command, ack, respond, logger }) => {
   } catch (error) {
     logger.error(error);
   }
+});
+slackApp.command("/janstones", async ({ command, ack, respond, logger }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "janstones");
+        await respond(response);
+    } catch (error) {
+        logger.error(error);
+    }
 });
 slackApp.error(async (error) => {
   const message = `DOES NOT COMPUTE: ${error.toString()}`;
