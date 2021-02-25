@@ -138,7 +138,6 @@ slackApp.command("/jumstones", async ({ command, ack, respond, logger }) => {
   }
 });
 slackApp.command("/janstones", async ({ command, ack, respond, logger }) => {
-  console.log(command);
     try {
         await ack();
         const response = await createTransaction(command, "janstones");
