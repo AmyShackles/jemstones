@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { App, ExpressReceiver, LogLevel } = require("@slack/bolt");
+const { App, ExpressReceiver } = require("@slack/bolt");
 const Transaction = require("./models/Transaction");
 const User = require("./models/User.js");
 const { createTransaction } = require("./routes/jemstonesRouter.js");
@@ -91,9 +91,8 @@ db.connectTo(mongoURI)
   });
 
 const slackApp = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  receiver,
-  logLevel: LogLevel.DEBUG,
+    token: process.env.SLACK_BOT_TOKEN,
+    receiver,
 });
 
 /* This event is no longer being subscribed to
@@ -101,51 +100,79 @@ slackApp.message("jemstones", async ({ message, say }) => {
   await say(`Did you mention jemstones, <@${message.user}>!?`);
 });
 */
-slackApp.command("/jamstones", async ({ command, ack, respond, logger }) => {
-  try {
-    await ack();
-    const response = await createTransaction(command, "jamstones");
-    await respond(response);
-  } catch (error) {
-    logger.error(error);
-  }
+slackApp.command("/colestones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "colestones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
 });
-slackApp.command("/jemstones", async ({ command, ack, respond, logger }) => {
-  try {
-    await ack();
-    const response = await createTransaction(command, "jemstones");
-    await respond(response);
-  } catch (error) {
-    logger.error(error);
-  }
+slackApp.command("/gerstones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "gerstones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
 });
-slackApp.command("/jomstones", async ({ command, ack, respond, logger }) => {
-  try {
-    await ack();
-    const response = await createTransaction(command, "jomstones");
-    await respond(response);
-  } catch (error) {
-    logger.error(error);
-  }
+slackApp.command("/harrystones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "harrystones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
 });
-slackApp.command("/jumstones", async ({ command, ack, respond, logger }) => {
-  try {
-    await ack();
-    const response = await createTransaction(command, "jumstones");
-    await respond(response);
-  } catch (error) {
-    logger.error(error);
-  }
+slackApp.command("/jamstones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "jamstones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
 });
-slackApp.command("/janstones", async ({ command, ack, respond, logger }) => {
+slackApp.command("/janstones", async ({ command, ack, respond }) => {
     try {
         await ack();
         const response = await createTransaction(command, "janstones");
         await respond(response);
     } catch (error) {
-        logger.error(error);
+        console.error(error);
     }
 });
+slackApp.command("/jemstones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "jemstones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
+});
+slackApp.command("/jomstones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "jomstones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
+});
+slackApp.command("/jumstones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "jumstones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 slackApp.error(async (error) => {
   const message = `DOES NOT COMPUTE: ${error.toString()}`;
   console.error(message);

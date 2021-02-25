@@ -41,7 +41,11 @@ GET https://jemstones.herokuapp.com/jum
 
 ### Slash command usage:
 ```
+/colestones <username of person you want to gift> <amount you want to gift>
+/gerstones <username of person you want to gift> <amount you want to gift>
+/harrystones <username of person you want to gift> <amount you want to gift>
 /jamstones <username of person you want to gift> <amount you want to gift>
+/janstones <username of person you want to gift> <amount you want to gift>
 /jemstones <username of person you want to gift> <amount you want to gift>
 /jomstones <username of person you want to gift> <amount you want to gift>
 /jumstones <username of person you want to gift> <amount you want to gift>
