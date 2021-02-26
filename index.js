@@ -40,18 +40,25 @@ router.get("/transactions", async (req, res) => {
 router.get("/", async (req, res) => {
   const { leaderboard } = req.query;
   let sort;
-  if (leaderboard && /jam/.test(leaderboard)) {
-    sort = "-jamstones";
-  } else if (leaderboard && /jem/.test(leaderboard)) {
-    sort = "-jemstones";
-  } else if (leaderboard && /jom/.test(leaderboard)) {
-    sort = "-jomstones";
-  } else if (leaderboard && /jum/.test(leaderboard)) {
-    sort = "-jumstones";
+
+  if (leaderboard && /col/.test(leaderboard)) {
+      sort = "-colestones";
+  } else if (leaderboard && /ger/.test(leaderboard)) {
+      sort = "-gerstones";
+  } else if (leaderboard && /har/.test(leaderboard)) {
+      sort = "-harrystones";
+  } else if (leaderboard && /jam/.test(leaderboard)) {
+      sort = "-jamstones";
   } else if (leaderboard && /jan/.test(leaderboard)) {
-    sort = "-janstones";
+      sort = "-janstones";
+  } else if (leaderboard && /jem/.test(leaderboard)) {
+      sort = "-jemstones";
+  } else if (leaderboard && /jom/.test(leaderboard)) {
+      sort = "-jomstones";
+  } else if (leaderboard && /jum/.test(leaderboard)) {
+      sort = "-jumstones";
   } else {
-    sort = "-stones";
+      sort = "-stones";
   }
   User.find()
     .select("-__v -_id")
@@ -63,18 +70,24 @@ router.get("/", async (req, res) => {
 router.get("/:type", async (req, res) => {
   const { type } = req.params;
   let sort;
-  if (type && /jam/.test(type)) {
-    sort = "-jamstones";
-  } else if (type && /jem/.test(type)) {
-    sort = "-jemstones";
-  } else if (type && /jom/.test(type)) {
-    sort = "-jomstones";
-  } else if (type && /jum/.test(type)) {
-    sort = "-jumstones";
+  if (type && /col/.test(type)) {
+      sort = "-colestones";
+  } else if (type && /ger/.test(type)) {
+      sort = "-gerstones";
+  } else if (type && /har/.test(type)) {
+      sort = "-harrystones";
+  } else if (type && /jam/.test(type)) {
+      sort = "-jamstones";
   } else if (type && /jan/.test(type)) {
-    sort = "-janstones";
+      sort = "-janstones";
+  } else if (type && /jem/.test(type)) {
+      sort = "-jemstones";
+  } else if (type && /jom/.test(type)) {
+      sort = "-jomstones";
+  } else if (type && /jum/.test(type)) {
+      sort = "-jumstones";
   } else {
-    sort = "-stones";
+      sort = "-stones";
   }
   User.find()
     .select("-__v -_id -createdAt -updatedAt")
