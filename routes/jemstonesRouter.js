@@ -157,13 +157,25 @@ async function createTransaction(command, jType) {
     const receiver_username = taker[1].slice(0, -1);
     const channel_id = command.channel_id;
     const channel_name = command.channel_name;
+    const trigger_id = command.trigger_id;
+    console.log({
+        giver_id,
+        giver_username,
+        receiver_id,
+        receiver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    });
+    if (giver_id === receiver_id) {
+    }
     const giver = await createOrUpdateGiver(
-      giver_id,
-      giver_username,
-      jType,
-      amount,
-      receiver_id,
-      receiver_username
+        giver_id,
+        giver_username,
+        jType,
+        amount,
+        receiver_id,
+        receiver_username
     );
     if (typeof giver === "string") {
       const message = `Just to let you know, <@${giver_id}|${giver_username}> totally tried to steal ${Math.abs(

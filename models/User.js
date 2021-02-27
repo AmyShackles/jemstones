@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const User = mongoose.Schema(
     {
@@ -6,6 +6,7 @@ const User = mongoose.Schema(
         user_name: String,
         display_name: String,
         image: String,
+        amystones: { type: Number, default: 0 },
         colestones: { type: Number, default: 0 },
         gerstones: { type: Number, default: 0 },
         harrystones: { type: Number, default: 0 },
@@ -19,31 +20,32 @@ const User = mongoose.Schema(
     { timestamps: true }
 );
 
-User.post('find', (docs) => {
-    docs.forEach(doc => {
+User.post("find", (docs) => {
+    docs.forEach((doc) => {
         if (
             doc.stones !==
-            doc.colestones +
-            doc.gerstones +
-            doc.harrystones +
-            doc.jamstones +
-            doc.janstones +
-                doc.jemstones +
-                doc.jomstones +
-                doc.jumstones 
-
-        ) {
-            doc.stones =
+                doc.amystones +
                 doc.colestones +
                 doc.gerstones +
                 doc.harrystones +
                 doc.jamstones +
                 doc.janstones +
-                    doc.jemstones +
-                    doc.jomstones +
-                    doc.jumstones 
+                doc.jemstones +
+                doc.jomstones +
+                doc.jumstones
+        ) {
+            doc.stones =
+                doc.amystones +
+                doc.colestones +
+                doc.gerstones +
+                doc.harrystones +
+                doc.jamstones +
+                doc.janstones +
+                doc.jemstones +
+                doc.jomstones +
+                doc.jumstones;
         }
-    })
+    });
     return;
-})
-module.exports = mongoose.model('User', User);
+});
+module.exports = mongoose.model("User", User);

@@ -41,7 +41,9 @@ router.get("/", async (req, res) => {
   const { leaderboard } = req.query;
   let sort;
 
-  if (leaderboard && /col/.test(leaderboard)) {
+  if (leaderboard && /amy/.test(leaderboard)) {
+      sort = "-amystones";
+  } else if (leaderboard && /col/.test(leaderboard)) {
       sort = "-colestones";
   } else if (leaderboard && /ger/.test(leaderboard)) {
       sort = "-gerstones";
@@ -70,7 +72,9 @@ router.get("/", async (req, res) => {
 router.get("/:type", async (req, res) => {
   const { type } = req.params;
   let sort;
-  if (type && /col/.test(type)) {
+  if (type && /amy/.test(type)) {
+      sort = "-amystones";
+  } else if (type && /col/.test(type)) {
       sort = "-colestones";
   } else if (type && /ger/.test(type)) {
       sort = "-gerstones";
@@ -113,6 +117,15 @@ slackApp.message("jemstones", async ({ message, say }) => {
   await say(`Did you mention jemstones, <@${message.user}>!?`);
 });
 */
+slackApp.command("/amystones", async ({ command, ack, respond }) => {
+    try {
+        await ack();
+        const response = await createTransaction(command, "amystones");
+        await respond(response);
+    } catch (error) {
+        console.error(error);
+    }
+});
 slackApp.command("/colestones", async ({ command, ack, respond }) => {
     try {
         await ack();
