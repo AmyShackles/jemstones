@@ -2,209 +2,595 @@ require("dotenv").config();
 const { App, ExpressReceiver } = require("@slack/bolt");
 const Transaction = require("./models/Transaction");
 const User = require("./models/User.js");
-const { createTransaction } = require("./routes/jemstonesRouter.js");
+const {
+    createTransaction,
+    resetStones,
+} = require("./routes/jemstonesRouter.js");
 const mongoose = require("mongoose");
 const db = require("./data/db.js");
 const mongoURI = process.env.MONGO_URI;
 mongoose.Promise = global.Promise;
 
 const receiver = new ExpressReceiver({
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
+    signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
 
 const router = receiver.router;
 router.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", `${process.env.REACT_APP}`);
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
+    res.header("Access-Control-Allow-Origin", `${process.env.REACT_APP}`);
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
 });
 const sendUserError = (status, message, res) => {
-  res.status(status).json({ error: message });
-  return;
+    res.status(status).json({ error: message });
+    return;
 };
 
 router.get("/transactions", async (req, res) => {
-  Transaction.find()
-    .select("-__v -_id -createdAt -updatedAt -channel_id")
-    .populate({ path: "giver", select: "user_name user_id" })
-    .populate({ path: "receiver", select: "user_name user_id" })
-    .then((transactions) => {
-      res.status(200).json({ transactions });
-    })
-    .catch((err) => sendUserError(500, err.message, res));
+    Transaction.find()
+        .select("-__v -_id -createdAt -updatedAt -channel_id")
+        .populate({ path: "giver", select: "user_name user_id" })
+        .populate({ path: "receiver", select: "user_name user_id" })
+        .then((transactions) => {
+            res.status(200).json({ transactions });
+        })
+        .catch((err) => sendUserError(500, err.message, res));
 });
 
 router.get("/", async (req, res) => {
-  const { leaderboard } = req.query;
-  let sort;
+    const { leaderboard } = req.query;
+    let sort;
 
-  if (leaderboard && /amy/.test(leaderboard)) {
-      sort = "-amystones";
-  } else if (leaderboard && /col/.test(leaderboard)) {
-      sort = "-colestones";
-  } else if (leaderboard && /ger/.test(leaderboard)) {
-      sort = "-gerstones";
-  } else if (leaderboard && /har/.test(leaderboard)) {
-      sort = "-harrystones";
-  } else if (leaderboard && /jam/.test(leaderboard)) {
-      sort = "-jamstones";
-  } else if (leaderboard && /jan/.test(leaderboard)) {
-      sort = "-janstones";
-  } else if (leaderboard && /jem/.test(leaderboard)) {
-      sort = "-jemstones";
-  } else if (leaderboard && /jom/.test(leaderboard)) {
-      sort = "-jomstones";
-  } else if (leaderboard && /jum/.test(leaderboard)) {
-      sort = "-jumstones";
-  } else {
-      sort = "-stones";
-  }
-  User.find()
-    .select("-__v -_id")
-    .sort(sort)
-    .then((leaders) => {
-      res.status(200).json({ leaders });
-    });
+    if (leaderboard && /amy/.test(leaderboard)) {
+        sort = "-amystones";
+    } else if (leaderboard && /col/.test(leaderboard)) {
+        sort = "-colestones";
+    } else if (leaderboard && /ger/.test(leaderboard)) {
+        sort = "-gerstones";
+    } else if (leaderboard && /har/.test(leaderboard)) {
+        sort = "-harrystones";
+    } else if (leaderboard && /jam/.test(leaderboard)) {
+        sort = "-jamstones";
+    } else if (leaderboard && /jan/.test(leaderboard)) {
+        sort = "-janstones";
+    } else if (leaderboard && /jem/.test(leaderboard)) {
+        sort = "-jemstones";
+    } else if (leaderboard && /jom/.test(leaderboard)) {
+        sort = "-jomstones";
+    } else if (leaderboard && /jum/.test(leaderboard)) {
+        sort = "-jumstones";
+    } else {
+        sort = "-stones";
+    }
+    User.find()
+        .select("-__v -_id")
+        .sort(sort)
+        .then((leaders) => {
+            res.status(200).json({ leaders });
+        });
 });
 router.get("/:type", async (req, res) => {
-  const { type } = req.params;
-  let sort;
-  if (type && /amy/.test(type)) {
-      sort = "-amystones";
-  } else if (type && /col/.test(type)) {
-      sort = "-colestones";
-  } else if (type && /ger/.test(type)) {
-      sort = "-gerstones";
-  } else if (type && /har/.test(type)) {
-      sort = "-harrystones";
-  } else if (type && /jam/.test(type)) {
-      sort = "-jamstones";
-  } else if (type && /jan/.test(type)) {
-      sort = "-janstones";
-  } else if (type && /jem/.test(type)) {
-      sort = "-jemstones";
-  } else if (type && /jom/.test(type)) {
-      sort = "-jomstones";
-  } else if (type && /jum/.test(type)) {
-      sort = "-jumstones";
-  } else {
-      sort = "-stones";
-  }
-  User.find()
-    .select("-__v -_id -createdAt -updatedAt")
-    .sort(sort)
-    .then((leaders) => {
-      res.status(200).json({ leaders });
-    });
+    const { type } = req.params;
+    let sort;
+    if (type && /amy/.test(type)) {
+        sort = "-amystones";
+    } else if (type && /col/.test(type)) {
+        sort = "-colestones";
+    } else if (type && /ger/.test(type)) {
+        sort = "-gerstones";
+    } else if (type && /har/.test(type)) {
+        sort = "-harrystones";
+    } else if (type && /jam/.test(type)) {
+        sort = "-jamstones";
+    } else if (type && /jan/.test(type)) {
+        sort = "-janstones";
+    } else if (type && /jem/.test(type)) {
+        sort = "-jemstones";
+    } else if (type && /jom/.test(type)) {
+        sort = "-jomstones";
+    } else if (type && /jum/.test(type)) {
+        sort = "-jumstones";
+    } else {
+        sort = "-stones";
+    }
+    User.find()
+        .select("-__v -_id -createdAt -updatedAt")
+        .sort(sort)
+        .then((leaders) => {
+            res.status(200).json({ leaders });
+        });
 });
 
 db.connectTo(mongoURI)
-  .then(() => console.log("\n...API Connected to database ...\n"))
-  .catch((err) => {
-    console.error(`\n*** ERROR connecting to database****: ${err}`);
-  });
+    .then(() => console.log("\n...API Connected to database ...\n"))
+    .catch((err) => {
+        console.error(`\n*** ERROR connecting to database****: ${err}`);
+    });
 
 const slackApp = new App({
     token: process.env.SLACK_BOT_TOKEN,
     receiver,
 });
 
-/* This event is no longer being subscribed to
-slackApp.message("jemstones", async ({ message, say }) => {
-  await say(`Did you mention jemstones, <@${message.user}>!?`);
-});
-*/
-slackApp.command("/amystones", async ({ command, ack, respond }) => {
+function earlyReturn(command, input, taker, amount, jType) {
+    if (!command.text) {
+        return `You cannae gift ${jType} without specifying a username and amount`;
+    }
+    if (taker.length < 2 && !/\|/.test(input[0])) {
+        return `You cannae gift ${jType} without specifying a username`;
+    }
+    if (!amount) {
+        return `You cannae gift ${jType} without specifying an amount`;
+    }
+}
+
+async function penaltyForGreed(client, trigger_id, giver_id) {
     try {
-        await ack();
-        const response = await createTransaction(command, "amystones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+        await client.views.open({
+            trigger_id,
+            view: {
+                type: "modal",
+                title: {
+                    type: "plain_text",
+                    text: "10 PTS FROM GRYFFINDOR!",
+                    emoji: true,
+                },
+                blocks: [
+                    {
+                        type: "header",
+                        text: {
+                            type: "plain_text",
+                            text: "Instant Regret",
+                            emoji: true,
+                        },
+                    },
+                    {
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text:
+                                "So.  It *_should_* go without saying, but you cannae gift yourself jemstone.\n\tAll is lost.  Literally.  You're reset to zero.\n\n\t*LET THIS BE A LESSON TO YOU.*",
+                        },
+                    },
+                    {
+                        type: "image",
+                        image_url:
+                            "https://media.giphy.com/media/R2nvBkAW7XIRy/giphy.gif",
+                        alt_text: "Severus Snape says 'Obviously'",
+                    },
+                ],
+            },
+        });
+        await resetStones(giver_id);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "amystones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "amystones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/colestones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "colestones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "colestones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "colestones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/gerstones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "gerstones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "gerstones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "gerstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/harrystones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "harrystones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "harrystones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "harrystones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/jamstones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "jamstones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "jamstones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "jamstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/janstones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "janstones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "janstones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "janstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/jemstones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "jemstones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "jemstones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "jemstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/jomstones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "jomstones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "jomstones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "jomstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
-slackApp.command("/jumstones", async ({ command, ack, respond }) => {
-    try {
-        await ack();
-        const response = await createTransaction(command, "jumstones");
-        await respond(response);
-    } catch (error) {
-        console.error(error);
+slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = parseInt(input[1]);
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "jumstones"
+    );
+    if (incorrectInvocation) {
+        respond(incorrectInvocation);
+    }
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+        trigger_id,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (giver_id === receiver_id) {
+        return await penaltyForGreed(client, trigger_id, giver_id);
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                trigger_id,
+                client,
+                "jumstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
 
 slackApp.error(async (error) => {
-  const message = `DOES NOT COMPUTE: ${error.toString()}`;
-  console.error(message);
+    const message = `DOES NOT COMPUTE: ${error.toString()}`;
+    console.error(message);
 });
 
 (async () => {
-  await slackApp.start(process.env.PORT || 8080);
-  console.log("* Bolt app is running! (better go catch it, then)");
+    await slackApp.start(process.env.PORT || 8080);
+    console.log("* Bolt app is running! (better go catch it, then)");
 })();
