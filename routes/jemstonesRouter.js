@@ -291,6 +291,7 @@ async function resetStones(id) {
         user.jemstones = 0;
         user.jomstones = 0;
         user.jumstones = 0;
+        user.stones = 0;
         user.save();
         return;
     } else {
