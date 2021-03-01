@@ -227,6 +227,7 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
             view_id = res.view.id;
         } catch (err) {
             console.error(err);
+            await new Promise((r) => setTimeout(r, 4000));
             await respond("Spot of bother -- if you wouldn't mind terribly, can you retry that command?")
         }
     const input = command.text.split(" ");
