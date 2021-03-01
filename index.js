@@ -203,27 +203,32 @@ async function penaltyForGreed(
 */
 slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Amystones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
+    let view_id;
+    try {
+            const res = await client.views.open({
+                trigger_id: command.trigger_id,
+                view: {
+                    type: "modal",
+                    title: {
                         type: "plain_text",
-                        text: ":meow_knife: Working on it...",
+                        text: "Amystones...",
                     },
+                    blocks: [
+                        {
+                            type: "section",
+                            text: {
+                                type: "plain_text",
+                                text: ":meow_knife: Working on it...",
+                            },
+                        },
+                    ],
                 },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
+            });
+            view_id = res.view.id;
+        } catch (err) {
+            console.error(err);
+            await respond("Spot of bother -- if you wouldn't mind terribly, can you retry that command?")
+        }
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -235,7 +240,7 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
         "amystones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -308,7 +313,7 @@ slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
         "colestones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -381,7 +386,7 @@ slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
         "gerstones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -454,7 +459,7 @@ slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
         "harrystones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -527,7 +532,7 @@ slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
         "jamstones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -600,7 +605,7 @@ slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
         "janstones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -673,7 +678,7 @@ slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
         "jemstones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -746,7 +751,7 @@ slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
         "jomstones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
@@ -819,7 +824,7 @@ slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
         "jumstones"
     );
     if (incorrectInvocation) {
-        respond(incorrectInvocation);
+        await respond(incorrectInvocation);
     }
     const {
         user_id: giver_id,
