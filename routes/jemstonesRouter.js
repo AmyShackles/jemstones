@@ -65,12 +65,8 @@ function createGiver(
                 await axios.post(
                     `https://slack.com/api/chat.postMessage?token=${process.env.SLACK_BOT_TOKEN}&channel=${giftee_id}&text=${message}&pretty=1`
                 );
-                let user = await User.create({
-                    user_id: id,
-                    image: data.profile.image_192,
-                    display_name: data.profile.display_name,
-                });
                 try {
+                    const stoneStatus = await resetStones(id, user_name, amount, "give", jType);
                         await client.views.open({
                                 trigger_id,
                                 view: {
@@ -85,9 +81,9 @@ function createGiver(
                                             type: "section",
                                             text: {
                                                 type: "mrkdwn",
-                                                text: `So.  It *_should_* go without saying, but you shouldnae steal from others.\n\tYou attempted to steal ${Math.abs(
+                                                text: `So.  It *_should_* go without saying, but you shouldnae steal from others.\nYou attempted to steal ${Math.abs(
                                                     amount
-                                                )} ${jType} from ${giftee_username}.\n\tAll is lost.  Literally.  You're reset to zero.\n\n\t*LET THIS BE A LESSON TO YOU.*`,
+                                                )} ${jType} from ${giftee_username}.\n${stoneStatus}\n\n\t*LET THIS BE A LESSON TO YOU.*`,
                                             },
                                         },
                                         {
@@ -99,13 +95,12 @@ function createGiver(
                                     ],
                                 },
                             });
-                    await resetStones(user.user_id);
                     return "Karma is a bitch.";
                 } catch (err) {
                     console.error(err);
                 }
             }
-        });
+        }).catch(err => console.error(err));
 }
 async function updateGiver(
     user,
@@ -128,6 +123,7 @@ async function updateGiver(
             await axios.post(
                 `https://slack.com/api/chat.postMessage?token=${process.env.SLACK_BOT_TOKEN}&channel=${giftee_id}&text=${message}&pretty=1`
             );
+            const stoneStatus = await resetStones(user.user_id, user.user_name, amount, "give", jType);
             await client.views.open({
                 trigger_id,
                 view: {
@@ -142,9 +138,9 @@ async function updateGiver(
                             type: "section",
                             text: {
                                 type: "mrkdwn",
-                                text: `So.  It *_should_* go without saying, but you shouldnae steal from others.\n\tYou attempted to steal ${Math.abs(
+                                text: `So.  It *_should_* go without saying, but you shouldnae steal from others.\nYou attempted to steal ${Math.abs(
                                     amount
-                                )} ${jType} from ${giftee_username}.\n\tAll is lost.  Literally.  You're reset to zero.\n\n\t*LET THIS BE A LESSON TO YOU.*`,
+                                )} ${jType} from ${giftee_username}.\n${stoneStatus}\n\n\t*LET THIS BE A LESSON TO YOU.*`,
                             },
                         },
                         {
@@ -155,8 +151,7 @@ async function updateGiver(
                         },
                     ],
                 },
-            });
-            await resetStones(user.user_id);
+            });   
             return "Karma is a bitch.";
         } catch (err) {
             console.error(err);
@@ -210,7 +205,7 @@ function createGiftee(
             await axios.post(
                 `https://slack.com/api/chat.postMessage?token=${process.env.SLACK_BOT_TOKEN}&channel=${id}&text=${message}&pretty=1`
             );
-            return User.create({
+            return await User.create({
                 user_id: id,
                 user_name,
                 image: data.profile.image_192,
@@ -235,6 +230,70 @@ function updateGiftee(user, id, jType, amount, gifter_id, gifter_username) {
         .catch((err) => console.error(err));
 }
 
+async function userRemovesStonesFromSelf(
+    id,
+    user_name,
+    amount,
+    trigger_id,
+    client,
+    jType
+) {
+    await client.views.open({
+        trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "I Have Concerns",
+                emoji: true,
+            },
+            blocks: [
+                {
+                    type: "header",
+                    text: {
+                        type: "plain_text",
+                        text: "Why don't you love yourself?",
+                        emoji: true,
+                    },
+                },
+                {
+                    type: "section",
+                    text: {
+                        type: "mrkdwn",
+                        text: `Don't really understand _why_ you would want to remove stones from yourself, but I'm just a humble bot.  Since you harm none but yourself, I will grant your request.\n\n${Math.abs(
+                            amount
+                        )} ${jType} have been removed from your collection.\n\nMay this bring you peace.`,
+                    },
+                },
+            ],
+        },
+    });
+    let user = await User.findOne({ user_id: id });
+    if (user) {
+        user[jType] += amount;
+        user.stones += amount;
+        user.save();
+    } else {
+        user = axios
+            .get(
+                `https://slack.com/api/users.profile.get?token=${process.env.SLACK_BOT_TOKEN}&user=${id}&pretty=1`
+            )
+            .then(async ({ data }) => {
+                return await User.create({
+                    user_id: id,
+                    user_name,
+                    image: data.profile.image_192,
+                    display_name: data.profile.display_name,
+                    [jType]: amount,
+                    stones: amount,
+                });
+            })
+            .catch((err) => console.error(err));
+    }
+
+    return user;
+}
+
 async function createTransaction(
     giver_id,
     giver_username,
@@ -247,6 +306,27 @@ async function createTransaction(
     client,
     jType
 ) {
+    if (giver_id === receiver_id) {
+        const user = await userRemovesStonesFromSelf(
+            giver_id,
+            giver_username,
+            amount,
+            trigger_id,
+            client,
+            jType
+        );
+        let doc = await Transaction.create({
+            channel_id,
+            channel_name,
+            giver: user,
+            receiver: user,
+            amount,
+            type: jType,
+        });
+        return `You subtracted ${Math.abs(
+            doc.amount
+        )} ${jType} from your collection.  Congrats, I guess?`;
+    }
     const giver = await createOrUpdateGiver(
         giver_id,
         giver_username,
@@ -279,35 +359,93 @@ async function createTransaction(
     return `You gifted <@${receiver_id}|${receiver_username}> a whole ${doc.amount} ${jType}!`;
 }
 
-async function resetStones(id) {
+async function resetStones(id, user_name, amount, type, jType) {
     const user = await User.findOne({ user_id: id });
     if (user) {
-        user.amystones = 0;
-        user.colestones = 0;
-        user.gerstones = 0;
-        user.harrystones = 0;
-        user.jamstones = 0;
-        user.janstones = 0;
-        user.jemstones = 0;
-        user.jomstones = 0;
-        user.jumstones = 0;
-        user.stones = 0;
-        user.save();
-        return;
+        // If the user has more stones than the amount they wanted to change, reset to 0
+        if (type === "take") {
+            if (user.stones - amount > 0) {
+                user.amystones = 0;
+                user.colestones = 0;
+                user.gerstones = 0;
+                user.harrystones = 0;
+                user.jamstones = 0;
+                user.janstones = 0;
+                user.jemstones = 0;
+                user.jomstones = 0;
+                user.jumstones = 0;
+                user.stones = 0;
+                user.save();
+                return `You attempted to give yourself ${amount} ${jType}.  Since you had more stones than that, all of your stones have been taken from you.`;
+            } else {
+                user[jType] -= amount;
+                user.stones -= amount;
+                user.save();
+                return `You attempted to give yourself ${amount} ${jType}.  Since you had less than 0 stones to start with, the number you tried to add has been subtracted from your total.`;
+            }
+        }
+        if (type === "give") {
+            if (user.stones + amount > 0) {
+                        user.amystones = 0;
+                        user.colestones = 0;
+                        user.gerstones = 0;
+                        user.harrystones = 0;
+                        user.jamstones = 0;
+                        user.janstones = 0;
+                        user.jemstones = 0;
+                        user.jomstones = 0;
+                        user.jumstones = 0;
+                        user.stones = 0;
+                        user.save();
+                        return "Since you had more stones than that, all of your stones have been taken from you.";
+            } else {
+                user[jType] += amount;
+                user.stones += amount;
+                user.save();
+                return `Since you had fewer than 0 stones to start with, ${Math.abs(
+                    amount
+                )} ${jType} have been taken from you.`;
+            }
+        }
     } else {
-        return axios
+        if (type == "take") {
+            return axios
             .get(
                 `https://slack.com/api/users.profile.get?token=${process.env.SLACK_BOT_TOKEN}&user=${id}&pretty=1`
             )
             .then(async ({ data }) => {
-                return await User.create({
+                await User.create({
                     user_id: id,
                     user_name,
                     image: data.profile.image_192,
                     display_name: data.profile.display_name,
+                    [jType]: amount,
+                    stones: amount
                 });
+                return `You attempted to give yourself ${amount} ${jType}.  Since you had less than 0 stones to start with, the number you tried to add has been subtracted from your total.`;
             })
             .catch((err) => console.error(err));
+        }
+        if (type === "give") {
+            return axios
+            .get(
+                `https://slack.com/api/users.profile.get?token=${process.env.SLACK_BOT_TOKEN}&user=${id}&pretty=1`
+            )
+            .then(async ({ data }) => {
+                await User.create({
+                    user_id: id,
+                    user_name,
+                    image: data.profile.image_192,
+                    display_name: data.profile.display_name,
+                    [jType]: amount,
+                    stones: amount
+                });
+                return `Since you had fewer than 0 stones to start with, ${Math.abs(
+                    amount
+                )} ${jType} has been taken from you.`;
+            })
+            .catch((err) => console.error(err));
+        }
     }
 }
 

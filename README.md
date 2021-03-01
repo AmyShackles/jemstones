@@ -8,67 +8,71 @@ A Slack integration to keep track of j[aeou]mstones through the use of slash com
 
 Server deployed at [https://jemstones.herokuapp.com/](https://jemstones.herokuapp.com/)
 
-Frontend application deployed at [https://jemstones.netlify.app](https://jemstones.netlify.app);
+Frontend application deployed at [https://jemstones.netlify.app](https:leaderboard///jemstones.netlify.app);
 
 ### Current endpoints accessible:
+
+GET https://jemstones.herokuapp.com/status
+- Endpoint to wake up dynos before executing slack events
+
 GET https://jemstones.herokuapp.com/transactions
 - Displays a list of all transactions that have taken place in the application
 
 GET https://jemstones.herokuapp.com/users
 - Displays a list of all users (includes those who give and receive jemstones)
 
-GET https://jemstones.herokuapp.com/?leaderboard=amy
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=amy
 - Displays a list of users sorted from highest to lowest amystones
 
-GET https://jemstones.herokuapp.com/?leaderboard=col
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=col
 - Displays a list of users sorted from highest to lowest colestones
 
-GET https://jemstones.herokuapp.com/?leaderboard=ger
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=ger
 - Displays a list of users sorted from highest to lowest gerstones
 
-GET https://jemstones.herokuapp.com/?leaderboard=har
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=har
 - Displays a list of users sorted from highest to lowest harrystones
 
-GET https://jemstones.herokuapp.com/?leaderboard=jam
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=jam
 - Displays a list of users sorted from highest to lowest jamstones
 
-GET https://jemstones.herokuapp.com/?leaderboard=jan
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=jan
 - Displays a list of users sorted from highest to lowest janstones
 
-GET https://jemstones.herokuapp.com/?leaderboard=jem
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=jem
 - Displays a list of users sorted from highest to lowest jemstones
 
-GET https://jemstones.herokuapp.com/?leaderboard=jom
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=jom
 - Displays a list of users sorted from highest to lowest jomstones
 
-GET https://jemstones.herokuapp.com/?leaderboard=jum
+GET https://jemstones.herokuapp.com/leaderboard?leaderboard=jum
 - Displays a list of users sorted from highest to lowest jumstones
 
-GET https://jemstones.herokuapp.com/amy
+GET https://jemstones.herokuapp.com/leaderboard/amy
 - Displays a list of users sorted from highest to lowest amystones
 
-GET https://jemstones.herokuapp.com/col
+GET https://jemstones.herokuapp.com/leaderboard/col
 - Displays a list of users sorted from highest to lowest colestones
 
-GET https://jemstones.herokuapp.com/ger
+GET https://jemstones.herokuapp.com/leaderboard/ger
 - Displays a list of users sorted from highest to lowest gerstones
 
-GET https://jemstones.herokuapp.com/har
+GET https://jemstones.herokuapp.com/leaderboard/har
 - Displays a list of users sorted from highest to lowest harrystones
 
-GET https://jemstones.herokuapp.com/jam
+GET https://jemstones.herokuapp.com/leaderboard/jam
 - Displays a list of users sorted from highest to lowest jamstones
 
-GET https://jemstones.herokuapp.com/jan
+GET https://jemstones.herokuapp.com/leaderboard/jan
 - Displays a list of users sorted from highest to lowest janstones
 
-GET https://jemstones.herokuapp.com/jem
+GET https://jemstones.herokuapp.com/leaderboard/jem
 - Displays a list of users sorted from highest to lowest jemstones
 
-GET https://jemstones.herokuapp.com/jom
+GET https://jemstones.herokuapp.com/leaderboard/jom
 - Displays a list of users sorted from highest to lowest jomstones
 
-GET https://jemstones.herokuapp.com/jum
+GET https://jemstones.herokuapp.com/leaderboard/jum
 - Displays a list of users sorted from highest to lowest jumstones
 
 
