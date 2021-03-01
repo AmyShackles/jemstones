@@ -9,7 +9,7 @@ async function createOrUpdateGiver(
     amount,
     giftee_id,
     giftee_username,
-    trigger_id,
+    view_id,
     client
 ) {
     const user = await User.findOne({ user_id: id });
@@ -20,7 +20,7 @@ async function createOrUpdateGiver(
             amount,
             giftee_id,
             giftee_username,
-            trigger_id,
+            view_id,
             client
         );
     } else {
@@ -31,7 +31,7 @@ async function createOrUpdateGiver(
             amount,
             giftee_id,
             giftee_username,
-            trigger_id,
+            view_id,
             client
         );
     }
@@ -43,7 +43,7 @@ function createGiver(
     amount,
     giftee_id,
     giftee_username,
-    trigger_id,
+    view_id,
     client
 ) {
     return axios
@@ -67,8 +67,8 @@ function createGiver(
                 );
                 try {
                     const stoneStatus = await resetStones(id, user_name, amount, "give", jType);
-                        await client.views.open({
-                                trigger_id,
+                        await client.views.update({
+                                view_id,
                                 view: {
                                     type: "modal",
                                     title: {
@@ -108,7 +108,7 @@ async function updateGiver(
     amount,
     giftee_id,
     giftee_username,
-    trigger_id,
+    view_id,
     client
 ) {
     if (amount > 0) {
@@ -124,8 +124,8 @@ async function updateGiver(
                 `https://slack.com/api/chat.postMessage?token=${process.env.SLACK_BOT_TOKEN}&channel=${giftee_id}&text=${message}&pretty=1`
             );
             const stoneStatus = await resetStones(user.user_id, user.user_name, amount, "give", jType);
-            await client.views.open({
-                trigger_id,
+            await client.views.update({
+                view_id,
                 view: {
                     type: "modal",
                     title: {
@@ -234,12 +234,12 @@ async function userRemovesStonesFromSelf(
     id,
     user_name,
     amount,
-    trigger_id,
+    view_id,
     client,
     jType
 ) {
-    await client.views.open({
-        trigger_id,
+    await client.views.update({
+        view_id,
         view: {
             type: "modal",
             title: {
@@ -302,7 +302,7 @@ async function createTransaction(
     channel_id,
     channel_name,
     amount,
-    trigger_id,
+    view_id,
     client,
     jType
 ) {
@@ -311,7 +311,7 @@ async function createTransaction(
             giver_id,
             giver_username,
             amount,
-            trigger_id,
+            view_id,
             client,
             jType
         );
@@ -334,7 +334,7 @@ async function createTransaction(
         amount,
         receiver_id,
         receiver_username,
-        trigger_id,
+        view_id,
         client
     );
     if (typeof giver === "string") {

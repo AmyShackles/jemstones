@@ -67,7 +67,7 @@ router.get("/leaderboard", async (req, res) => {
         sort = "-stones";
     }
     User.find()
-        .select("-__v -_id")
+        .select("-__v -_id -createdAt -updatedAt")
         .sort(sort)
         .then((leaders) => {
             res.status(200).json({ leaders });
@@ -137,7 +137,7 @@ function earlyReturn(command, input, taker, amount, jType) {
 
 async function penaltyForGreed(
     client,
-    trigger_id,
+    view_id,
     giver_id,
     giver_username,
     amount,
@@ -151,8 +151,8 @@ async function penaltyForGreed(
         jType
     );
     try {
-        await client.views.open({
-            trigger_id,
+        await client.views.update({
+            view_id,
             view: {
                 type: "modal",
                 title: {
@@ -203,7 +203,27 @@ async function penaltyForGreed(
 */
 slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Amystones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -222,14 +242,13 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -245,7 +264,7 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "amystones"
             );
@@ -257,7 +276,27 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Colestones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -276,14 +315,13 @@ slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -299,7 +337,7 @@ slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "colestones"
             );
@@ -311,7 +349,27 @@ slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Gerstones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -330,14 +388,13 @@ slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -353,7 +410,7 @@ slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "gerstones"
             );
@@ -365,7 +422,27 @@ slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Harrystones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -384,14 +461,13 @@ slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -407,7 +483,7 @@ slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "harrystones"
             );
@@ -419,7 +495,27 @@ slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Jamstones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -438,14 +534,13 @@ slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -461,7 +556,7 @@ slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "jamstones"
             );
@@ -473,7 +568,27 @@ slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Janstones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -492,14 +607,13 @@ slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -515,7 +629,7 @@ slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "janstones"
             );
@@ -527,7 +641,27 @@ slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Jemstones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -546,14 +680,13 @@ slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -569,7 +702,7 @@ slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "jemstones"
             );
@@ -581,7 +714,27 @@ slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Jomstones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -600,14 +753,13 @@ slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -623,7 +775,7 @@ slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "jomstones"
             );
@@ -635,7 +787,27 @@ slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
     await ack();
-    await axios.get("https://jemstones.herokuapp.com/status");
+    const res = await client.views.open({
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            title: {
+                type: "plain_text",
+                text: "Jumstones...",
+            },
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: ":meow_knife: Working on it...",
+                    },
+                },
+            ],
+        },
+    });
+    const view_id = res.view.id;
+    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -654,14 +826,13 @@ slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
         user_name: giver_username,
         channel_id,
         channel_name,
-        trigger_id,
     } = command;
     const receiver_id = taker[0].slice(2);
     const receiver_username = taker[1].slice(0, -1);
     if (amount > 0 && giver_id === receiver_id) {
         return await penaltyForGreed(
             client,
-            trigger_id,
+            view_id,
             giver_id,
             giver_username,
             amount,
@@ -677,7 +848,7 @@ slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
                 channel_id,
                 channel_name,
                 amount,
-                trigger_id,
+                view_id,
                 client,
                 "jumstones"
             );
