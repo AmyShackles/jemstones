@@ -20,39 +20,4 @@ const User = mongoose.Schema(
     { timestamps: true }
 );
 
-User.post("find", (docs) => {
-    docs.forEach((doc) => {
-        if (
-            doc.stones !==
-                doc.amystones +
-                doc.colestones +
-                doc.gerstones +
-                doc.harrystones +
-                doc.jamstones +
-                doc.janstones +
-                doc.jemstones +
-                doc.jomstones +
-                doc.jumstones
-        ) {
-            doc.stones =
-                doc.amystones +
-                doc.colestones +
-                doc.gerstones +
-                doc.harrystones +
-                doc.jamstones +
-                doc.janstones +
-                doc.jemstones +
-                doc.jomstones +
-                doc.jumstones;
-        }
-    });
-    return;
-});
 module.exports = mongoose.model("User", User);
-
-                
-            
-                
-            
-                
-            

@@ -8,15 +8,14 @@ const {
 } = require("./routes/jemstonesRouter.js");
 const mongoose = require("mongoose");
 const db = require("./data/db.js");
-const axios = require("axios");
 const mongoURI = process.env.MONGO_URI;
 mongoose.Promise = global.Promise;
-
 const receiver = new ExpressReceiver({
     signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
 
 const router = receiver.router;
+
 router.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", `${process.env.REACT_APP}`);
     res.header(
@@ -29,6 +28,59 @@ const sendUserError = (status, message, res) => {
     res.status(status).json({ error: message });
     return;
 };
+router.get("/", (req, res) => {
+    res.status(200).send("Site is up and running");
+});
+
+router.get("/leaderboard", (req, res) => {
+    console.log("/ route");
+    User.find()
+        .select("-__v -_id -createdAt -updatedAt")
+        .sort("-stones")
+        .lean()
+        .then((leaders) => {
+            res.status(200).json({ leaders });
+        })
+        .catch((err) => sendUserError(500, err.message, res));
+});
+
+router.get("/leaderboard/:type", (req, res) => {
+    const { type } = req.params;
+    let sort;
+    if (type) {
+        if (/amy/.test(type)) {
+            sort = "-amystones";
+        } else if (/col/.test(type)) {
+            sort = "-colestones";
+        } else if (/ger/.test(type)) {
+            sort = "-gerstones";
+        } else if (/har/.test(type)) {
+            sort = "-harrystones";
+        } else if (/jam/.test(type)) {
+            sort = "-jamstones";
+        } else if (/jan/.test(type)) {
+            sort = "-janstones";
+        } else if (/jem/.test(type)) {
+            sort = "-jemstones";
+        } else if (/jom/.test(type)) {
+            sort = "-jomstones";
+        } else if (/jum/.test(type)) {
+            sort = "-jumstones";
+        } else {
+            sort = "-stones";
+        }
+    } else {
+        sort = "-stones";
+    }
+    User.find()
+        .select("-__v -_id -createdAt -updatedAt")
+        .sort(sort)
+        .lean()
+        .then((leaders) => {
+            res.status(200).json({ leaders });
+        })
+        .catch((err) => sendUserError(500, err.message, res));
+});
 
 router.get("/transactions", async (req, res) => {
     Transaction.find()
@@ -39,74 +91,6 @@ router.get("/transactions", async (req, res) => {
             res.status(200).json({ transactions });
         })
         .catch((err) => sendUserError(500, err.message, res));
-});
-
-router.get("/leaderboard", async (req, res) => {
-    const { leaderboard } = req.query;
-    let sort;
-
-    if (leaderboard && /amy/.test(leaderboard)) {
-        sort = "-amystones";
-    } else if (leaderboard && /col/.test(leaderboard)) {
-        sort = "-colestones";
-    } else if (leaderboard && /ger/.test(leaderboard)) {
-        sort = "-gerstones";
-    } else if (leaderboard && /har/.test(leaderboard)) {
-        sort = "-harrystones";
-    } else if (leaderboard && /jam/.test(leaderboard)) {
-        sort = "-jamstones";
-    } else if (leaderboard && /jan/.test(leaderboard)) {
-        sort = "-janstones";
-    } else if (leaderboard && /jem/.test(leaderboard)) {
-        sort = "-jemstones";
-    } else if (leaderboard && /jom/.test(leaderboard)) {
-        sort = "-jomstones";
-    } else if (leaderboard && /jum/.test(leaderboard)) {
-        sort = "-jumstones";
-    } else {
-        sort = "-stones";
-    }
-    User.find()
-        .select("-__v -_id -createdAt -updatedAt")
-        .sort(sort)
-        .then((leaders) => {
-            res.status(200).json({ leaders });
-        });
-});
-router.get("/leaderboard/:type", async (req, res) => {
-    const { type } = req.params;
-    let sort;
-    if (type && /amy/.test(type)) {
-        sort = "-amystones";
-    } else if (type && /col/.test(type)) {
-        sort = "-colestones";
-    } else if (type && /ger/.test(type)) {
-        sort = "-gerstones";
-    } else if (type && /har/.test(type)) {
-        sort = "-harrystones";
-    } else if (type && /jam/.test(type)) {
-        sort = "-jamstones";
-    } else if (type && /jan/.test(type)) {
-        sort = "-janstones";
-    } else if (type && /jem/.test(type)) {
-        sort = "-jemstones";
-    } else if (type && /jom/.test(type)) {
-        sort = "-jomstones";
-    } else if (type && /jum/.test(type)) {
-        sort = "-jumstones";
-    } else {
-        sort = "-stones";
-    }
-    User.find()
-        .select("-__v -_id -createdAt -updatedAt")
-        .sort(sort)
-        .then((leaders) => {
-            res.status(200).json({ leaders });
-        });
-});
-
-router.get("/status", (req, res) => {
-    res.send("Dynos are waking up");
 });
 
 db.connectTo(mongoURI)
@@ -189,6 +173,38 @@ async function penaltyForGreed(
         console.error(err);
     }
 }
+
+async function openFirstModal(client, jType, trigger_id) {
+    let view_id;
+    try {
+        const res = await client.views.open({
+            trigger_id,
+            view: {
+                type: "modal",
+                title: {
+                    type: "plain_text",
+                    text: `${jType}...`,
+                },
+                blocks: [
+                    {
+                        type: "section",
+                        text: {
+                            type: "plain_text",
+                            text: ":meow_knife: Working on it...",
+                        },
+                    },
+                ],
+            },
+        });
+        view_id = res.view.id;
+    } catch (err) {
+        console.error(err);
+        return await respond(
+            "Spot of bother -- if you wouldn't mind terribly, can you retry that command?"
+        );
+    }
+    return view_id;
+}
 /*
     command.text for following slash commands is in the form:
     "<@U1234|user> 23"
@@ -203,33 +219,6 @@ async function penaltyForGreed(
 */
 slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
     await ack();
-    let view_id;
-    try {
-            const res = await client.views.open({
-                trigger_id: command.trigger_id,
-                view: {
-                    type: "modal",
-                    title: {
-                        type: "plain_text",
-                        text: "Amystones...",
-                    },
-                    blocks: [
-                        {
-                            type: "section",
-                            text: {
-                                type: "plain_text",
-                                text: ":meow_knife: Working on it...",
-                            },
-                        },
-                    ],
-                },
-            });
-            view_id = res.view.id;
-        } catch (err) {
-            console.error(err);
-            await new Promise((r) => setTimeout(r, 4000));
-            await respond("Spot of bother -- if you wouldn't mind terribly, can you retry that command?")
-        }
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -241,8 +230,13 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
         "amystones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Amystones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -282,27 +276,6 @@ slackApp.command("/amystones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Colestones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -314,8 +287,13 @@ slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
         "colestones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Colestones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -355,27 +333,6 @@ slackApp.command("/colestones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Gerstones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -387,8 +344,13 @@ slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
         "gerstones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Gerstones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -428,27 +390,6 @@ slackApp.command("/gerstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Harrystones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -460,8 +401,13 @@ slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
         "harrystones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Harrystones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -501,27 +447,6 @@ slackApp.command("/harrystones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Jamstones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -533,8 +458,13 @@ slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
         "jamstones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Jamstones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -574,27 +504,6 @@ slackApp.command("/jamstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Janstones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -606,8 +515,13 @@ slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
         "janstones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Janstones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -647,27 +561,6 @@ slackApp.command("/janstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Jemstones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -679,8 +572,13 @@ slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
         "jemstones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Jemstones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -720,27 +618,6 @@ slackApp.command("/jemstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Jomstones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -752,8 +629,13 @@ slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
         "jomstones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Jomstones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
@@ -793,27 +675,6 @@ slackApp.command("/jomstones", async ({ command, ack, respond, client }) => {
 });
 slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
     await ack();
-    const res = await client.views.open({
-        trigger_id: command.trigger_id,
-        view: {
-            type: "modal",
-            title: {
-                type: "plain_text",
-                text: "Jumstones...",
-            },
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "plain_text",
-                        text: ":meow_knife: Working on it...",
-                    },
-                },
-            ],
-        },
-    });
-    const view_id = res.view.id;
-    await new Promise((r) => setTimeout(r, 4000));
     const input = command.text.split(" ");
     const taker = input[0].split("|");
     const amount = +input[1];
@@ -825,8 +686,13 @@ slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
         "jumstones"
     );
     if (incorrectInvocation) {
-        await respond(incorrectInvocation);
+        return await respond(incorrectInvocation);
     }
+    const view_id = await openFirstModal(
+        client,
+        "Jumstones",
+        command.trigger_id
+    );
     const {
         user_id: giver_id,
         user_name: giver_username,
