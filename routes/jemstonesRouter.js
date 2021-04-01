@@ -374,6 +374,7 @@ async function resetStones(id, user_name, amount, type, jType) {
                 user.jemstones = 0;
                 user.jomstones = 0;
                 user.jumstones = 0;
+                user.ticestones = 0;
                 user.stones = 0;
                 user.save();
                 return `You attempted to give yourself ${amount} ${jType}.  Since you had more stones than that, all of your stones have been taken from you.`;
@@ -381,7 +382,7 @@ async function resetStones(id, user_name, amount, type, jType) {
                 user[jType] -= amount;
                 user.stones -= amount;
                 user.save();
-                return `You attempted to give yourself ${amount} ${jType}.  Since you had less than 0 stones to start with, the number you tried to add has been subtracted from your total.`;
+                return `You attempted to give yourself ${amount} ${jType}.  Since you had less than ${amount} stones to start with, the number you tried to add has been subtracted from your total.`;
             }
         }
         if (type === "give") {
@@ -395,6 +396,7 @@ async function resetStones(id, user_name, amount, type, jType) {
                         user.jemstones = 0;
                         user.jomstones = 0;
                         user.jumstones = 0;
+                        user.ticestones = 0;
                         user.stones = 0;
                         user.save();
                         return "Since you had more stones than that, all of your stones have been taken from you.";

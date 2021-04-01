@@ -15,6 +15,7 @@ const User = mongoose.Schema(
         jemstones: { type: Number, default: 0 },
         jomstones: { type: Number, default: 0 },
         jumstones: { type: Number, default: 0 },
+        ticestones: { type: Number, default: 0 },
         stones: { type: Number, default: 0 },
     },
     { timestamps: true }

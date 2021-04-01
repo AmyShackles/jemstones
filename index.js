@@ -33,7 +33,6 @@ router.get("/", (req, res) => {
 });
 
 router.get("/leaderboard", (req, res) => {
-    console.log("/ route");
     User.find()
         .select("-__v -_id -createdAt -updatedAt")
         .sort("-stones")
@@ -723,6 +722,64 @@ slackApp.command("/jumstones", async ({ command, ack, respond, client }) => {
                 view_id,
                 client,
                 "jumstones"
+            );
+            await respond(response);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+});
+
+slackApp.command("/ticestones", async ({ command, ack, respond, client }) => {
+    await ack();
+    const input = command.text.split(" ");
+    const taker = input[0].split("|");
+    const amount = +input[1];
+    const incorrectInvocation = earlyReturn(
+        command,
+        input,
+        taker,
+        amount,
+        "ticestones"
+    );
+    if (incorrectInvocation) {
+        return await respond(incorrectInvocation);
+    }
+    const view_id = await openFirstModal(
+        client,
+        "Ticestones",
+        command.trigger_id
+    );
+    const {
+        user_id: giver_id,
+        user_name: giver_username,
+        channel_id,
+        channel_name,
+    } = command;
+    const receiver_id = taker[0].slice(2);
+    const receiver_username = taker[1].slice(0, -1);
+    if (amount > 0 && giver_id === receiver_id) {
+        return await penaltyForGreed(
+            client,
+            view_id,
+            giver_id,
+            giver_username,
+            amount,
+            "ticestones"
+        );
+    } else {
+        try {
+            const response = await createTransaction(
+                giver_id,
+                giver_username,
+                receiver_id,
+                receiver_username,
+                channel_id,
+                channel_name,
+                amount,
+                view_id,
+                client,
+                "ticestones"
             );
             await respond(response);
         } catch (error) {
