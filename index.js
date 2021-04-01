@@ -65,6 +65,8 @@ router.get("/leaderboard/:type", (req, res) => {
             sort = "-jomstones";
         } else if (/jum/.test(type)) {
             sort = "-jumstones";
+        } else if (/tice/.test(type)) {
+            sort = "-ticestones";
         } else {
             sort = "-stones";
         }
